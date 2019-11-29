@@ -4,7 +4,7 @@
 
 <title>CTC Global</title>
 <?php
-echo "<body style='background-color:green'>";
+echo "<body style='background-color:blue'>";
 echo '<h1 align="center">Welcome CTC</h1>';
 echo "!!!!! Howdy folks !!!!!!!"; 
 ?>
