@@ -8,9 +8,31 @@ pipeline {
 				string defaultValue: 'helloworld-uat', description: '', name: 'UATAPP', trim: false
 				string defaultValue: 'helloworld', description: '', name: 'DEVPROJ', trim: false
 				string defaultValue: 'helloworld', description: '', name: 'UATPROJ', trim: false
+				string defaultValue: 'https://raw.githubusercontent.com/andrewctcsg/helloworld-php/jenkinsfile/helloworld-php-template.yaml', description: '', name: 'TEMPLATEPATH', trim: false
 			}
             stages {
-                stage('build') {
+                stage('setup') {
+				when {
+                        expression {
+                            openshift.withCluster() {
+                                openshift.withProject("${params.DEVPROJ}") {
+                                    return !openshift.selector('dc', "${params.DPCFG}").exists()
+                                }
+                            }
+                        }
+                    } // when
+                    steps {
+                        script {
+                            openshift.withCluster() {
+                                openshift.withProject("${params.DEVPROJ}") {
+                                echo "Using project: ${openshift.project()} to create app"
+                                openshift.newApp(${TEMPLATEPATH})     
+                                }
+                            }
+                        } // script
+                    } // steps
+                } // stage
+				stage('build') {
                     steps {
                         script {
                             openshift.withCluster() {
