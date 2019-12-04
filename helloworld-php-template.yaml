@@ -1,0 +1,125 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: helloworld-template
+  annotations:
+    description: "hello world template test"
+    iconClass: "icon-php"
+    tags: "php,helloworld"
+objects:
+-   kind: "BuildConfig"
+    apiVersion: "build.openshift.io/v1"
+    metadata:
+      name: "helloworld"
+      labels:
+        app: helloworld
+        app.kubernetes.io/component: helloworld
+        app.kubernetes.io/instance: helloworld
+        app.kubernetes.io/part-of: helloworld
+    spec:
+      successfulBuildsHistoryLimit: 6 
+      failedBuildsHistoryLimit: 3 
+      triggers: 
+        - type: "GitHub"
+          github:
+            secret: "secret101"
+        - type: "Generic"
+          generic:
+            secret: "secret101"
+        - type: "ImageChange"
+      source: 
+        type: "Git"
+        git:
+          uri: "https://github.com/andrewctcsg/helloworld-php.git"
+          ref: "php"
+      strategy: 
+        type: "Source"
+        sourceStrategy:
+          from:
+            kind: "ImageStreamTag"
+            namespace: "openshift"
+            name: "php:7.2"
+      output: 
+        to:
+          kind: "ImageStreamTag"
+          name: "helloworld:latest"
+          
+-   kind: "DeploymentConfig"
+    apiVersion: "apps.openshift.io/v1"
+    metadata:
+      name: "helloworld"
+      labels:
+        app: helloworld
+        app.kubernetes.io/component: helloworld
+        app.kubernetes.io/instance: helloworld
+        app.kubernetes.io/part-of: helloworld
+    spec:
+      template: 
+        metadata:
+          labels:
+            name: "helloworld"
+        spec:
+          containers:
+            - name: "helloworld"
+              image: "helloworld:latest"
+              ports:
+                - containerPort: 8080
+                  protocol: "TCP"
+      replicas: 2 
+      selector:
+        name: "helloworld"
+      triggers:
+        - type: "ConfigChange" 
+        - type: "ImageChange" 
+          imageChangeParams:
+            automatic: true
+            containerNames:
+              - "helloworld"
+            from:
+              kind: "ImageStreamTag"
+              name: "helloworld:latest"
+      strategy: 
+        type: "Rolling"
+          
+-   kind: "ImageStream"
+    apiVersion: "image.openshift.io/v1"
+    metadata: 
+      name: "helloworld"
+      
+-   apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: helloworld
+      labels:
+        app: helloworld
+        app.kubernetes.io/component: helloworld
+        app.kubernetes.io/instance: helloworld
+        app.kubernetes.io/part-of: helloworld
+    spec:
+      path:
+      to:
+        kind: Service
+        name: helloworld
+      port:
+        targetPort: 8080-tcp
+      wildcardPolicy: None 
+        
+-   kind: Service
+    apiVersion: v1
+    metadata:
+      name: helloworld
+      labels:
+        app: helloworld
+        app.kubernetes.io/component: helloworld
+        app.kubernetes.io/instance: helloworld
+        app.kubernetes.io/part-of: helloworld      
+    spec:
+      selector:                  
+        name: helloworld
+      ports:
+        - name: 8080-tcp
+          protocol: TCP
+          port: 8080
+          targetPort: 8080       
+    status:
+      loadBalancer: {}
