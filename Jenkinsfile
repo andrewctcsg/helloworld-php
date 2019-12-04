@@ -26,7 +26,7 @@ pipeline {
                             openshift.withCluster() {
                                 openshift.withProject("${params.DEVPROJ}") {
                                 echo "Using project: ${openshift.project()} to create app"
-                                openshift.newApp(${TEMPLATEPATH})     
+                                openshift.newApp(${params.TEMPLATEPATH})     
                                 }
                             }
                         } // script
