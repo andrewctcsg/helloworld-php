@@ -6,7 +6,7 @@
 <?php
 echo "<body style='background-color:grey'>";
 echo '<h1 align="center">Welcome CTC</h1>';
-echo "!!!!! Howdy folks !!!!!!!"; 
+echo "Helloworld"; 
 ?>
 
 </body>
